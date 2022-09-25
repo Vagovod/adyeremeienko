@@ -24,20 +24,9 @@ function newTodo() {
     updateCounters();
 }
 
-function toggleCheckbox(key) {
-    // find todo index
-    const index = todos.findIndex(el => el.id === Number(key));
-    // change todo in array
-    todos[index].checked = !todos[index].checked;
-    // update top counters
-    updateCounters();
-    // update localStorage array
-    localStorage.setItem('todos', JSON.stringify(todos));
-}
-
 function renderTodo(item) {
     // check if item needs to be deleted
-    if (item?.toDele) {
+    if (item?.toDelete) {
         // find li of item
         const li = document.getElementById(`${item.id}`);
         // destroy li on page
@@ -51,7 +40,7 @@ function renderTodo(item) {
         // add todo class
         li.setAttribute("class", `${classNames.TODO_ITEM}`)
         // set inner tags - checkbox, label with text and delete button
-        li.innerHTML = `<input onClich="toggleCheckbox(${item.id})" class="${classNames.TODO_CHECKBOX}" type="checkbox" ${item.checked ? "checked" : ""}>
+        li.innerHTML = `<input onClick="toggleCheckbox(${item.id})" class="${classNames.TODO_CHECKBOX}" type="checkbox" ${item.checked ? "checked" : ""}>
                     <label class="${classNames.TODO_TEXT}"><span>${item?.text}</span></label>
                     <button class="${classNames.TODO_DELETE}" onClick="deleteTodo(${item.id})">delete</button>`;
         // add li to our list on page
@@ -63,6 +52,18 @@ function renderTodo(item) {
     updateCounters();
 }
 
+function toggleCheckbox(key) {
+    // find todo by key and change its cheked prop
+    todos = todos.map(todo => {
+        if (todo.id !== key) return todo
+        return {...todo, checked: !todo.checked}
+    });
+    // update top counters
+    updateCounters();
+    // update localStorage array
+    localStorage.setItem('todos', JSON.stringify(todos));
+}
+
 function deleteTodo(key) {
     // find todo index in array
     const index = todos.findIndex(item => item.id === Number(key));
@@ -70,7 +71,7 @@ function deleteTodo(key) {
     if (index >= 0) {
         // add deleted prop
         const todo = {
-            deleted: true, id: key,
+            toDelete: true, id: key,
             ...todos[index]
         };
         // delete todo from array
@@ -93,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // if they exist
     if (localTodos) {
         // parse localStorage and set to our todo array
-        todos = JSON.parse(ref);
+        todos = JSON.parse(localTodos);
         // render each todo from array
         todos.forEach(todo => {
             renderTodo(todo);
